@@ -1,0 +1,8 @@
+name=mango
+version=0.12.6
+description=Lightweight Wayland compositor based on dwl
+maintainer=yaman
+depends=git,meson,ninja,pkg-config,gcc
+type=script
+license=MIT
+arch=any

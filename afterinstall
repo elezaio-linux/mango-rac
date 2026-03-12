@@ -1,0 +1,58 @@
+#!/bin/bash
+set -e
+
+echo "Building MangoWC from source..."
+
+# Install build deps
+if command -v apt-get &>/dev/null; then
+   sudo apt-get install -y libwayland-dev wayland-protocols libinput-dev \
+      libdrm-dev libxkbcommon-dev libpixman-1-dev libgbm-dev \
+      libgles2-mesa-dev libegl1-mesa-dev libxcb-ewmh-dev \
+      libxcb-icccm4-dev libxcb-res0-dev libxcb-present-dev \
+      libxcb-composite0-dev libxcb-xinput-dev libxcb-xfixes0-dev \
+      libx11-dev libx11-xcb-dev libseat-dev libdisplay-info-dev \
+      libliftoff-dev xwayland hwdata
+elif command -v dnf &>/dev/null; then
+    sudo dnf install -y wayland-devel wayland-protocols-devel \
+      libinput-devel libdrm-devel libxkbcommon-devel \
+      pixman-devel mesa-libgbm-devel mesa-libGLES-devel \
+      libxcb-devel libX11-devel libseat-devel \
+      xwayland hwdata
+fi
+
+cd /tmp
+
+# Build wlroots
+echo "Building wlroots..."
+rm -rf /tmp/wlroots
+git clone -b 0.19.2 https://gitlab.freedesktop.org/wlroots/wlroots.git
+cd wlroots
+meson setup build -Dprefix=/usr -Dwerror=false -Dxwayland=enabled -Dbackends=drm,libinput
+sudo ninja -C build install
+ldconfig
+cd /tmp
+rm -rf wlroots
+
+# Build scenefx
+echo "Building scenefx..."
+rm -rf /tmp/scenefx
+git clone -b 0.4.1 https://github.com/wlrfx/scenefx.git
+cd scenefx
+meson setup build -Dprefix=/usr -Dwerror=false
+sudo ninja -C build install
+ldconfig
+cd /tmp
+rm -rf scenefx
+
+# Build mango
+echo "Building mango..."
+rm -rf /tmp/mango
+git clone https://github.com/mangowm/mango.git
+cd mango
+meson setup build -Dprefix=/usr -Dwerror=false
+sudo ninja -C build install
+cd /tmp
+rm -rf mango
+
+echo "MangoWC installed successfully!"
+echo "Run 'mango' to start"
